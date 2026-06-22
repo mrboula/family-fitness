@@ -1,0 +1,545 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f4f0; min-height: 100vh; }
+
+.app { max-width: 900px; margin: 0 auto; padding: 16px; }
+
+.header { text-align: center; padding: 24px 0 16px; }
+.header h1 { font-size: 26px; font-weight: 600; color: #1a1a1a; letter-spacing: -0.5px; }
+.header p { font-size: 13px; color: #888; margin-top: 4px; }
+
+.member-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+.member-tab { 
+  padding: 10px 22px; border-radius: 24px; border: 1.5px solid #ddd; 
+  background: white; cursor: pointer; font-size: 14px; font-weight: 500;
+  transition: all 0.15s; color: #555;
+}
+.member-tab:hover { border-color: #aaa; }
+.member-tab.active { border-color: transparent; color: white; }
+.member-tab.jake { background: #3b6fb5; border-color: #3b6fb5; }
+.member-tab.meredith { background: #d4537e; border-color: #d4537e; }
+.member-tab.lily { background: #1D9E75; border-color: #1D9E75; }
+.member-tab.max { background: #7F77DD; border-color: #7F77DD; }
+
+.date-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 20px; }
+.date-nav button { 
+  width: 32px; height: 32px; border-radius: 50%; border: 1px solid #ddd; 
+  background: white; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;
+}
+.date-nav button:hover { background: #f0f0f0; }
+.date-label { font-size: 15px; font-weight: 500; color: #333; min-width: 160px; text-align: center; }
+
+.dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 600px) { .dashboard { grid-template-columns: 1fr; } }
+
+.card { background: white; border-radius: 14px; padding: 18px; border: 0.5px solid #e8e8e8; }
+.card h3 { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+.card.full-width { grid-column: 1 / -1; }
+
+.metric-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.metric-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.metric-label { font-size: 13px; color: #666; flex: 1; }
+.metric-input { 
+  width: 90px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 6px 10px;
+  font-size: 14px; font-weight: 500; text-align: right; background: #fafafa;
+  transition: border-color 0.15s;
+}
+.metric-input:focus { outline: none; border-color: #3b6fb5; background: white; }
+.metric-unit { font-size: 12px; color: #aaa; min-width: 30px; }
+
+.weight-section { border-top: 0.5px solid #f0f0f0; margin-top: 10px; padding-top: 12px; }
+
+.steps-big { text-align: center; padding: 10px 0; }
+.steps-big input { 
+  font-size: 36px; font-weight: 700; text-align: center; border: none; 
+  background: transparent; width: 160px; color: #1a1a1a; outline: none;
+}
+.steps-big .steps-label { font-size: 12px; color: #aaa; margin-top: 2px; }
+.steps-progress { margin-top: 10px; height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
+.steps-bar { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+
+.workout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.workout-chip {
+  padding: 8px 12px; border-radius: 10px; border: 1.5px solid #e8e8e8;
+  background: white; cursor: pointer; font-size: 13px; text-align: center;
+  transition: all 0.15s; color: #555; font-weight: 500;
+}
+.workout-chip:hover { border-color: #ccc; }
+.workout-chip.selected { color: white; border-color: transparent; }
+.workout-chip.selected.jake { background: #3b6fb5; }
+.workout-chip.selected.meredith { background: #d4537e; }
+.workout-chip.selected.lily { background: #1D9E75; }
+.workout-chip.selected.max { background: #7F77DD; }
+
+.lift-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.lift-name { font-size: 13px; color: #555; flex: 1; }
+.lift-input { 
+  width: 56px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 5px 8px;
+  font-size: 13px; text-align: center; background: #fafafa;
+}
+.lift-input:focus { outline: none; border-color: #3b6fb5; background: white; }
+.lift-unit { font-size: 11px; color: #bbb; width: 28px; }
+
+.food-entry { display: flex; gap: 8px; margin-bottom: 8px; }
+.food-entry input { 
+  flex: 1; border: 1px solid #e0e0e0; border-radius: 8px; padding: 7px 10px;
+  font-size: 13px; background: #fafafa;
+}
+.food-entry input:focus { outline: none; border-color: #3b6fb5; background: white; }
+.food-cal { width: 70px; }
+.food-list { max-height: 120px; overflow-y: auto; }
+.food-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 0.5px solid #f5f5f5; font-size: 13px; }
+.food-item .name { color: #444; flex: 1; }
+.food-item .cals { color: #888; font-weight: 500; }
+.food-item .remove { color: #ccc; cursor: pointer; font-size: 16px; padding: 0 4px; }
+.food-item .remove:hover { color: #e24b4a; }
+.total-cals { text-align: right; font-size: 13px; color: #888; margin-top: 8px; }
+.total-cals strong { color: #333; }
+
+.add-btn { 
+  padding: 7px 14px; border-radius: 8px; border: 1px solid #e0e0e0;
+  background: white; cursor: pointer; font-size: 13px; color: #555;
+  transition: all 0.15s;
+}
+.add-btn:hover { background: #f5f5f5; }
+
+.save-btn {
+  display: block; width: 100%; padding: 13px; border-radius: 12px; border: none;
+  font-size: 15px; font-weight: 600; color: white; cursor: pointer;
+  margin-top: 14px; transition: opacity 0.15s; letter-spacing: 0.2px;
+}
+.save-btn:hover { opacity: 0.88; }
+.save-btn.jake { background: #3b6fb5; }
+.save-btn.meredith { background: #d4537e; }
+.save-btn.lily { background: #1D9E75; }
+.save-btn.max { background: #7F77DD; }
+
+.achievement-strip { 
+  display: flex; gap: 8px; flex-wrap: wrap; padding: 8px 0;
+}
+.badge {
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  display: flex; align-items: center; gap: 5px;
+}
+.badge.earned { background: #faeeda; color: #854f0b; }
+.badge.locked { background: #f5f5f5; color: #bbb; }
+
+.week-chart-wrap { width: 100%; height: 180px; position: relative; }
+canvas { display: block; }
+
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: #1a1a1a; color: white; padding: 12px 24px; border-radius: 24px;
+  font-size: 14px; font-weight: 500; opacity: 0; transition: opacity 0.3s;
+  pointer-events: none; z-index: 999;
+}
+.toast.show { opacity: 1; }
+
+.streak-row { display: flex; gap: 6px; justify-content: center; margin: 8px 0; }
+.streak-dot { 
+  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 10px; font-weight: 700;
+}
+.streak-dot.done { color: white; }
+.streak-dot.today { border: 2px solid; }
+.streak-dot.empty { background: #f0f0f0; color: #ccc; }
+
+.empty-state { text-align: center; padding: 24px; color: #bbb; font-size: 13px; }
+
+.calorie-ring { display: flex; justify-content: center; margin: 8px 0; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>🏋️ Boula Family Fitness</h1>
+    <p>Track workouts, steps, and progress together</p>
+  </div>
+
+  <div class="member-tabs" id="memberTabs"></div>
+  <div class="date-nav">
+    <button onclick="changeDate(-1)">&#8249;</button>
+    <div class="date-label" id="dateLabel"></div>
+    <button onclick="changeDate(1)">&#8250;</button>
+  </div>
+
+  <div class="dashboard" id="dashboard"></div>
+  <button class="save-btn" id="saveBtn" onclick="saveDay()">Save Today</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const MEMBERS = [
+  { id: 'jake', name: 'Jake', emoji: '💪', color: '#3b6fb5', hasWeight: true, hasCals: true },
+  { id: 'meredith', name: 'Meredith', emoji: '⭐', color: '#d4537e', hasWeight: false, hasCals: true },
+  { id: 'lily', name: 'Lily', emoji: '🌟', color: '#1D9E75', hasWeight: false, hasCals: false },
+  { id: 'max', name: 'Max', emoji: '🔥', color: '#7F77DD', hasWeight: true, hasCals: true }
+];
+
+const WORKOUTS = ['Running','Cycling','Yoga','HIIT','Swimming','Walking','Stretching','Sports'];
+const LIFTS = ['Bench Press','Squats','Deadlift','Rows','Shoulder Press','Curls','Pull-ups'];
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const ACHIEVEMENTS = [
+  { id: 'steps_5k', label: '5K Steps', emoji: '🚶', check: d => (d.steps||0) >= 5000 },
+  { id: 'steps_10k', label: '10K Steps', emoji: '🏃', check: d => (d.steps||0) >= 10000 },
+  { id: 'pushups_50', label: '50 Push-ups', emoji: '💪', check: d => (d.pushups||0) >= 50 },
+  { id: 'situps_50', label: '50 Sit-ups', emoji: '🔥', check: d => (d.situps||0) >= 50 },
+  { id: 'lifted', label: 'Lifted Today', emoji: '🏋️', check: d => Object.values(d.lifts||{}).some(v=>v>0) },
+  { id: 'full_day', label: 'Full Session', emoji: '🌟', check: d => (d.steps||0)>=5000 && (d.pushups||0)>=20 && (d.situps||0)>=20 },
+];
+
+let state = {};
+let currentMember = 'jake';
+let currentDate = todayKey();
+let weekChart = null;
+let foodInput = { name: '', cals: '' };
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function loadState() {
+  try { state = JSON.parse(localStorage.getItem('boulaFitness') || '{}'); } catch { state = {}; }
+}
+function saveState() {
+  localStorage.setItem('boulaFitness', JSON.stringify(state));
+}
+function getMemberDay(memberId, dateKey) {
+  if (!state[memberId]) state[memberId] = {};
+  if (!state[memberId][dateKey]) state[memberId][dateKey] = { steps:0, pushups:0, situps:0, workouts:[], lifts:{}, food:[], weight:null };
+  const d = state[memberId][dateKey];
+  if (!d.lifts) d.lifts = {};
+  if (!d.food) d.food = [];
+  if (!d.workouts) d.workouts = [];
+  return d;
+}
+
+function dateFromKey(key) {
+  const [y,m,d] = key.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+function keyFromDate(dt) {
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+}
+function formatDateLabel(key) {
+  const dt = dateFromKey(key);
+  const today = todayKey();
+  if (key === today) return `Today, ${dt.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+  if (key === keyFromDate(yesterday)) return `Yesterday, ${dt.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+  return dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+}
+
+function changeDate(delta) {
+  const dt = dateFromKey(currentDate);
+  dt.setDate(dt.getDate() + delta);
+  const newKey = keyFromDate(dt);
+  if (newKey > todayKey()) return;
+  currentDate = newKey;
+  render();
+}
+
+function getWeekKeys() {
+  const keys = [];
+  const dt = dateFromKey(currentDate);
+  const dow = dt.getDay();
+  const monday = new Date(dt); monday.setDate(dt.getDate() - dow + (dow===0?-6:1));
+  for (let i=0; i<7; i++) {
+    const d = new Date(monday); d.setDate(monday.getDate()+i);
+    keys.push(keyFromDate(d));
+  }
+  return keys;
+}
+
+function getWeekStreak() {
+  const wk = getWeekKeys().filter(k => k <= todayKey());
+  return wk.map(k => {
+    const d = getMemberDay(currentMember, k);
+    return (d.steps>0||d.pushups>0||d.situps>0||d.workouts.length>0);
+  });
+}
+
+function computeAchievements(data) {
+  return ACHIEVEMENTS.map(a => ({ ...a, earned: a.check(data) }));
+}
+
+function renderMemberTabs() {
+  const container = document.getElementById('memberTabs');
+  container.innerHTML = MEMBERS.map(m =>
+    `<button class="member-tab ${m.id} ${currentMember===m.id?'active':''}" onclick="selectMember('${m.id}')">${m.emoji} ${m.name}</button>`
+  ).join('');
+}
+
+function selectMember(id) {
+  currentMember = id;
+  if (weekChart) { weekChart.destroy(); weekChart = null; }
+  render();
+}
+
+function render() {
+  renderMemberTabs();
+  document.getElementById('dateLabel').textContent = formatDateLabel(currentDate);
+  const member = MEMBERS.find(m => m.id === currentMember);
+  const data = getMemberDay(currentMember, currentDate);
+
+  const btn = document.getElementById('saveBtn');
+  btn.className = `save-btn ${currentMember}`;
+
+  const dash = document.getElementById('dashboard');
+  dash.innerHTML = `
+    ${renderStepsCard(member, data)}
+    ${renderBodyweightCard(member, data)}
+    ${renderWorkoutsCard(member, data)}
+    ${renderLiftsCard(member, data)}
+    ${member.hasCals ? renderFoodCard(member, data) : ''}
+    ${renderAchievementsCard(data)}
+    <div class="card full-width" id="weekChartCard">
+      <h3>📅 This week</h3>
+      ${renderStreakDots()}
+      <div class="week-chart-wrap"><canvas id="weekChart" role="img" aria-label="Steps this week"></canvas></div>
+    </div>
+  `;
+
+  attachListeners(member, data);
+  setTimeout(() => drawWeekChart(member), 50);
+}
+
+function renderStepsCard(member, data) {
+  const pct = Math.min(100, Math.round(((data.steps||0)/10000)*100));
+  return `<div class="card">
+    <h3>🚶 Steps</h3>
+    <div class="steps-big">
+      <input type="number" id="inp-steps" value="${data.steps||0}" min="0" placeholder="0" onchange="updateField('steps', this.value)">
+      <div class="steps-label">goal: 10,000</div>
+    </div>
+    <div class="steps-progress">
+      <div class="steps-bar" style="width:${pct}%; background:${member.color};"></div>
+    </div>
+    <div style="text-align:right; font-size:11px; color:#aaa; margin-top:4px;">${pct}% of goal</div>
+  </div>`;
+}
+
+function renderBodyweightCard(member, data) {
+  return `<div class="card">
+    <h3>⚡ Daily reps</h3>
+    <div class="metric-row">
+      <div class="metric-icon" style="background:#f0f7ff; font-size:20px;">🤜</div>
+      <span class="metric-label">Push-ups</span>
+      <input class="metric-input" type="number" id="inp-pushups" value="${data.pushups||0}" min="0" onchange="updateField('pushups', this.value)">
+      <span class="metric-unit">reps</span>
+    </div>
+    <div class="metric-row">
+      <div class="metric-icon" style="background:#f0fff4; font-size:20px;">🔄</div>
+      <span class="metric-label">Sit-ups</span>
+      <input class="metric-input" type="number" id="inp-situps" value="${data.situps||0}" min="0" onchange="updateField('situps', this.value)">
+      <span class="metric-unit">reps</span>
+    </div>
+    ${member.hasWeight ? `<div class="weight-section">
+      <div class="metric-row">
+        <div class="metric-icon" style="background:#fef9ec; font-size:18px;">⚖️</div>
+        <span class="metric-label">Body weight</span>
+        <input class="metric-input" type="number" id="inp-weight" value="${data.weight||''}" min="0" step="0.1" placeholder="—" onchange="updateField('weight', this.value)">
+        <span class="metric-unit">lbs</span>
+      </div>
+    </div>` : ''}
+  </div>`;
+}
+
+function renderWorkoutsCard(member, data) {
+  return `<div class="card">
+    <h3>🏃 Workout type</h3>
+    <div class="workout-grid">
+      ${WORKOUTS.map(w => `<button class="workout-chip ${(data.workouts||[]).includes(w)?'selected '+member.id:''}" onclick="toggleWorkout('${w}')">${w}</button>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderLiftsCard(member, data) {
+  return `<div class="card">
+    <h3>🏋️ Weightlifting</h3>
+    ${LIFTS.map(l => `<div class="lift-row">
+      <span class="lift-name">${l}</span>
+      <input class="lift-input" type="number" id="lift-${l.replace(/ /g,'_')}" value="${(data.lifts||{})[l]||''}" min="0" placeholder="0" onchange="updateLift('${l}', this.value)">
+      <span class="lift-unit">lbs</span>
+      <input class="lift-input" type="number" id="liftsets-${l.replace(/ /g,'_')}" value="${(data.liftSets||{})[l]||''}" min="0" placeholder="0" onchange="updateLiftSets('${l}', this.value)">
+      <span class="lift-unit" style="width:24px">sets</span>
+    </div>`).join('')}
+  </div>`;
+}
+
+function renderFoodCard(member, data) {
+  const foods = data.food || [];
+  const totalCals = foods.reduce((s,f) => s+(f.cals||0), 0);
+  return `<div class="card">
+    <h3>🥗 Nutrition</h3>
+    <div class="food-entry">
+      <input type="text" id="foodName" placeholder="What did you eat?" oninput="foodInput.name=this.value">
+      <input type="number" class="food-cal" id="foodCals" placeholder="Cal" min="0" oninput="foodInput.cals=this.value">
+      <button class="add-btn" onclick="addFood()">Add</button>
+    </div>
+    <div class="food-list">
+      ${foods.length===0 ? '<div class="empty-state">No food logged yet</div>' : foods.map((f,i) => `<div class="food-item">
+        <span class="name">${f.name}</span>
+        <span class="cals">${f.cals} cal</span>
+        <span class="remove" onclick="removeFood(${i})">×</span>
+      </div>`).join('')}
+    </div>
+    ${foods.length>0?`<div class="total-cals">Total: <strong>${totalCals.toLocaleString()} cal</strong></div>`:''}
+  </div>`;
+}
+
+function renderAchievementsCard(data) {
+  const achv = computeAchievements(data);
+  const earned = achv.filter(a=>a.earned);
+  return `<div class="card">
+    <h3>🏅 Today's achievements</h3>
+    ${earned.length===0?'<div class="empty-state">Keep going — badges unlock as you log!</div>':
+    `<div class="achievement-strip">${achv.map(a=>`<span class="badge ${a.earned?'earned':'locked'}">${a.emoji} ${a.label}</span>`).join('')}</div>`}
+  </div>`;
+}
+
+function renderStreakDots() {
+  const wk = getWeekKeys();
+  const streak = getWeekStreak();
+  const member = MEMBERS.find(m=>m.id===currentMember);
+  return `<div class="streak-row">
+    ${wk.map((k,i) => {
+      const isPast = k < todayKey();
+      const isToday = k === todayKey();
+      const done = streak[i];
+      let cls = 'streak-dot ';
+      let style = '';
+      if (done) { cls+='done'; style=`background:${member.color};`; }
+      else if (isToday) { cls+='today'; style=`border-color:${member.color}; color:${member.color};`; }
+      else { cls+='empty'; }
+      return `<div class="${cls}" style="${style}" title="${k}">${DAYS[dateFromKey(k).getDay()]}</div>`;
+    }).join('')}
+  </div>`;
+}
+
+function drawWeekChart(member) {
+  const wk = getWeekKeys().filter(k=>k<=todayKey());
+  const labels = wk.map(k=>DAYS[dateFromKey(k).getDay()]);
+  const stepsData = wk.map(k=>(getMemberDay(member.id,k).steps||0));
+  const puData = wk.map(k=>(getMemberDay(member.id,k).pushups||0));
+  const ctx = document.getElementById('weekChart');
+  if (!ctx) return;
+  if (weekChart) { weekChart.destroy(); weekChart=null; }
+  weekChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Steps', data: stepsData, backgroundColor: member.color+'bb', borderRadius: 6, yAxisID: 'y' },
+        { label: 'Push-ups', data: puData, backgroundColor: '#e8e8e8', borderRadius: 6, yAxisID: 'y2' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { position:'left', grid:{color:'#f5f5f5'}, ticks:{color:'#aaa',font:{size:11}}, title:{display:true,text:'Steps',color:'#aaa',font:{size:10}} },
+        y2: { position:'right', grid:{drawOnChartArea:false}, ticks:{color:'#ccc',font:{size:11}}, title:{display:true,text:'Push-ups',color:'#ccc',font:{size:10}} },
+        x: { grid:{display:false}, ticks:{color:'#aaa',font:{size:11}} }
+      }
+    }
+  });
+}
+
+function updateField(field, val) {
+  const data = getMemberDay(currentMember, currentDate);
+  data[field] = field==='weight' ? parseFloat(val)||null : parseInt(val)||0;
+  refreshAchievements(data);
+}
+function updateLift(lift, val) {
+  const data = getMemberDay(currentMember, currentDate);
+  if (!data.lifts) data.lifts={};
+  data.lifts[lift] = parseInt(val)||0;
+  refreshAchievements(data);
+}
+function updateLiftSets(lift, val) {
+  const data = getMemberDay(currentMember, currentDate);
+  if (!data.liftSets) data.liftSets={};
+  data.liftSets[lift] = parseInt(val)||0;
+}
+function toggleWorkout(w) {
+  const data = getMemberDay(currentMember, currentDate);
+  if (!data.workouts) data.workouts=[];
+  const idx = data.workouts.indexOf(w);
+  if (idx>-1) data.workouts.splice(idx,1); else data.workouts.push(w);
+  const member = MEMBERS.find(m=>m.id===currentMember);
+  document.getElementById('dashboard').querySelectorAll('.workout-chip').forEach(el=>{
+    if(el.textContent.trim()===w) {
+      el.className = `workout-chip ${data.workouts.includes(w)?'selected '+currentMember:''}`;
+    }
+  });
+  refreshAchievements(data);
+}
+function addFood() {
+  const name = document.getElementById('foodName').value.trim();
+  const cals = parseInt(document.getElementById('foodCals').value)||0;
+  if (!name) return;
+  const data = getMemberDay(currentMember, currentDate);
+  if (!data.food) data.food=[];
+  data.food.push({name, cals});
+  document.getElementById('foodName').value='';
+  document.getElementById('foodCals').value='';
+  foodInput={name:'',cals:''};
+  renderFoodSection(data);
+  refreshAchievements(data);
+}
+function removeFood(idx) {
+  const data = getMemberDay(currentMember, currentDate);
+  data.food.splice(idx,1);
+  renderFoodSection(data);
+}
+function renderFoodSection(data) {
+  const member = MEMBERS.find(m=>m.id===currentMember);
+  if (!member.hasCals) return;
+  const foods = data.food||[];
+  const totalCals = foods.reduce((s,f)=>s+(f.cals||0),0);
+  const list = document.querySelector('.food-list');
+  if (list) list.innerHTML = foods.length===0?'<div class="empty-state">No food logged yet</div>':
+    foods.map((f,i)=>`<div class="food-item"><span class="name">${f.name}</span><span class="cals">${f.cals} cal</span><span class="remove" onclick="removeFood(${i})">×</span></div>`).join('');
+  const totEl = document.querySelector('.total-cals');
+  if (totEl && foods.length>0) totEl.innerHTML=`Total: <strong>${totalCals.toLocaleString()} cal</strong>`;
+}
+function refreshAchievements(data) {
+  const achv = computeAchievements(data);
+  const earned = achv.filter(a=>a.earned);
+  const card = document.querySelector('#dashboard .card:nth-child(6)');
+  if (card) {
+    const inner = card.querySelector('.achievement-strip, .empty-state');
+    if (inner) inner.outerHTML = earned.length===0?'<div class="empty-state">Keep going — badges unlock as you log!</div>':
+      `<div class="achievement-strip">${achv.map(a=>`<span class="badge ${a.earned?'earned':'locked'}">${a.emoji} ${a.label}</span>`).join('')}</div>`;
+  }
+}
+
+function attachListeners(member, data) {}
+
+function saveDay() {
+  saveState();
+  showToast('✅ Saved!');
+  if (weekChart) { weekChart.destroy(); weekChart=null; }
+  setTimeout(() => drawWeekChart(MEMBERS.find(m=>m.id===currentMember)), 100);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+loadState();
+render();
+</script>
+</body>
+</html>
